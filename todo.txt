@@ -1,0 +1,42 @@
+ALREADY IMPLEMENTED:
+
+Simple sound changes (e.g. a/b/c_, a//c_, /a/c_, a/b/V_V - incl. epenthesis)
+# (beginning/end of word)
+Categories in target/replacement
+Optional elements
+Spaces as word boundaries
+\ (metathesis)
+Nonce categories
+> (gemination/degemination)
+Backreferencing: use @1, @2, @3 to refer to previous variables
+Proper display - monospace, syntax highlighting
+Rule exceptions
+Glosses
+Regex rules
+Rewrite rules
+Syllabification
+Categories inside categories
+Affixer
+	Infixes & Affixer
+Saving, opening
+Show changed words
+Make category disappear (e.g. CV/C~/_ makes V disappear)
+Probability
+Special treatment of '/XYZ/_#'
+Comments with '*'
+Show rules
+e.g. FV@1/FVP/_
+e.g. [pt]/[fs]/_V
+Output formats
+Negative: [~abc]
+
+-------------------------------------------------
+NOT IMPLEMENTED:
+
+Test syllabify dialog
+Highlight categories box/regex box
+Comment functions
+Analogy:
+	'|' Glosses
+	'|' Gloss conditions
+	'|' Glosses & Affixer
