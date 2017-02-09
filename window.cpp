@@ -109,6 +109,10 @@ Window::Window()
 
     toolsMenu = menuBar()->addMenu("Tools");
     toolsMenu->addAction("Affixer", this, &Window::LaunchAffixer);
+
+    helpMenu = menuBar()->addMenu("Help");
+    helpMenu->addAction("About", this, &Window::LaunchAboutBox);
+    helpMenu->addAction("About Qt", this, &Window::LaunchAboutQt);
 }
 
 void Window::DoSoundChanges()
@@ -374,4 +378,14 @@ void Window::SaveLex()
     }
 
     file.close();
+}
+
+void Window::LaunchAboutBox()
+{
+    QMessageBox::about(this, "About exSCA", "<b>exSCA</b><br/>Version 2.0.0<br/>Copyright &copy; Brad Neimann 2017");
+}
+
+void Window::LaunchAboutQt()
+{
+    QMessageBox::aboutQt(this, "About Qt");
 }

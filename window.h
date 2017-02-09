@@ -66,6 +66,7 @@ private:
 
     QMenu *fileMenu;
     QMenu *toolsMenu;
+    QMenu *helpMenu;
 
 private slots:
     void DoSoundChanges();
@@ -76,7 +77,10 @@ private slots:
     void OpenLex();
     void SaveEsc();
     void SaveLex();
+
     void LaunchAffixer();
+    void LaunchAboutBox();
+    void LaunchAboutQt();
 };
 
 #endif // WINDOW_H
