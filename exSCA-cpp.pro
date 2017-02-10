@@ -16,3 +16,5 @@ HEADERS += \
     soundchanges.h \
     highlighter.h \
     affixerdialog.h
+
+RC_ICONS = Icon.ico
