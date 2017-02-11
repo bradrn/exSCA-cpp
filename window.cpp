@@ -49,7 +49,6 @@ Window::Window()
     m_midlayout->addWidget(m_reportChanges);
 
     m_doBackwards = new QCheckBox("Rewrite on output");
-    m_doBackwards->setChecked(true);
     m_midlayout->addWidget(m_doBackwards);
 
     const QChar arrow(0x2192);
