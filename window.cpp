@@ -302,6 +302,7 @@ void Window::OpenEsc()
     }
 
     QTextStream in(&file);
+    in.setCodec("UTF-8");
 
     QStringList cats, rules, rews;
 
@@ -332,6 +333,7 @@ void Window::OpenLex()
     }
 
     QTextStream in(&file);
+    in.setCodec("UTF-8");
 
     QStringList words;
     while (!in.atEnd()) words.append(in.readLine());
@@ -353,9 +355,10 @@ void Window::SaveEsc()
     }
 
     QTextStream out(&file);
-    out << m_categories->toPlainText() << endl;
-    out << m_rewrites->toPlainText() << endl;
-    out << m_rules->toPlainText() << endl;
+    out.setCodec("UTF-8");
+    out << m_categories->toPlainText().toUtf8() << endl;
+    out << m_rewrites  ->toPlainText().toUtf8() << endl;
+    out << m_rules     ->toPlainText().toUtf8() << endl;
 
     file.close();
 }
@@ -372,9 +375,10 @@ void Window::SaveLex()
     }
 
     QTextStream out(&file);
+    out.setCodec("UTF-8");
     for (QString word : m_words->toPlainText().split('\n'))
     {
-        out << word << endl;
+        out << word.toUtf8() << endl;
     }
 
     file.close();
