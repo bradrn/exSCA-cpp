@@ -4,7 +4,7 @@ An extended version of Mark Rosenfelder's Sound Change Applier
 ### Downloads
 Download executables via the releases page.
 
-The latest release is [**Version 2.0.0**](https://github.com/bradrn/exSCA-cpp/releases).
+The latest release is [**Version 2.0.1**](https://github.com/bradrn/exSCA-cpp/releases).
 The installer is named `exSCA-setup.exe`.
 
 Unfortunately, exSCA-cpp is currently only available under Windows.
