@@ -119,7 +119,7 @@ void Window::DoSoundChanges()
     QStringList result;
     QString syllabifyregexp(SoundChanges::PreProcessRegexp(m_syllabify->text(), *m_categorieslist));
     QString report;
-    for (QString word : m_words->toPlainText().split('\n', QString::SkipEmptyParts))
+    for (QString word : m_words->toPlainText().split('\n'))
     {
         QString gloss = "";
         bool hasGloss = false;
