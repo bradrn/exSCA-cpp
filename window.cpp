@@ -112,6 +112,11 @@ Window::Window()
     helpMenu = menuBar()->addMenu("Help");
     helpMenu->addAction("About", this, &Window::LaunchAboutBox);
     helpMenu->addAction("About Qt", this, &Window::LaunchAboutQt);
+
+    if (QCoreApplication::arguments().length() > 1)
+    {
+        RealOpenEsc(QCoreApplication::arguments().at(1));
+    }
 }
 
 void Window::DoSoundChanges()
@@ -292,6 +297,11 @@ void Window::AddFromAffixer(QStringList words, AffixerDialog::PlaceToAdd placeTo
 void Window::OpenEsc()
 {
     QString fileName = QFileDialog::getOpenFileName(this, "Open .esc File", QString(), "exSCA Files (*.esc);;All files (*.*)");
+    RealOpenEsc(fileName);
+}
+
+void Window::RealOpenEsc(QString fileName)
+{
     QFile file(fileName);
 
     if (!file.open(QIODevice::ReadOnly))

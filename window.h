@@ -77,6 +77,7 @@ private slots:
     void OpenLex();
     void SaveEsc();
     void SaveLex();
+    void RealOpenEsc(QString fileName);
 
     void LaunchAffixer();
     void LaunchAboutBox();
