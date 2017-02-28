@@ -17,19 +17,18 @@ QString SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, QLis
 {
     QStringList splitChange = change.split("/");
     QString replaced = word;
-    int correction = 0;           // if the change succeeded, the indices might have been changed so we need to correct them
 
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> rand;                 // used when rule begins with '?'
 
-    for (int wordIndex = 0; wordIndex <= word.length(); wordIndex++)  // '<= word.length()' and not '< word.length()' because material can be added to the end of the word (e.g. '/XYZ/_#')
+    for (int wordIndex = 0; wordIndex <= replaced.length(); wordIndex++)  // '<= word.length()' and not '< word.length()' because material can be added to the end of the word (e.g. '/XYZ/_#')
     {
         int startpos, length;
         QQueue<int> catnums;
         bool tryRule = true;
         if (rand(gen) >= (probability / 100.0)) tryRule = false;
-        if (tryRule && SoundChanges::TryRule(word, wordIndex, change, categories, &startpos, &length, &catnums))
+        if (tryRule && SoundChanges::TryRule(replaced, wordIndex, change, categories, &startpos, &length, &catnums))
         {
             if (change.at(0) == '_')
             {
@@ -106,9 +105,8 @@ QString SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, QLis
                         break;
                     }
                 }
-                replaced = replaced.replace(startpos - correction, length, replacement);
-
-                correction += length - replacement.length();
+                replaced = replaced.replace(startpos, length, replacement);
+                wordIndex += replacement.length() - length;
             }
         }
     }
