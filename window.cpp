@@ -332,7 +332,7 @@ void Window::RealOpenEsc(QString fileName)
 
 void Window::OpenLex()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Open .esc File", QString(), "exSCA word files (*.lex);;All files (*.*)");
+    QString fileName = QFileDialog::getOpenFileName(this, "Open .lex File", QString(), "exSCA word files (*.lex);;All files (*.*)");
     QFile file(fileName);
 
     if (!file.open(QIODevice::ReadOnly))
@@ -354,7 +354,7 @@ void Window::OpenLex()
 
 void Window::SaveEsc()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, "Open .esc File", QString(), "exSCA Files (*.esc);;All files (*.*)");
+    QString fileName = QFileDialog::getSaveFileName(this, "Save As .esc File", QString(), "exSCA Files (*.esc);;All files (*.*)");
     QFile file(fileName);
 
     if (!file.open(QIODevice::WriteOnly))
@@ -374,7 +374,7 @@ void Window::SaveEsc()
 
 void Window::SaveLex()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Open .esc File", QString(), "exSCA word files (*.lex);;All files (*.*)");
+    QString fileName = QFileDialog::getSaveFileName(this, "Save As .lex File", QString(), "exSCA word files (*.lex);;All files (*.*)");
     QFile file(fileName);
 
     if (!file.open(QIODevice::WriteOnly))
