@@ -134,9 +134,10 @@ bool SoundChanges::TryRule(QString word,
             for (int i = 3; i < splitChange.length(); i++)
             {
                 QStringList splitException = splitChange.at(i).split("_");
-                int beforePartLength = SoundChanges::ActualLength(splitException.at(0));
+                int beforePartLength        = SoundChanges::ActualLength(splitException              .at(0));
+                int beforeEnvironmentLength = SoundChanges::ActualLength(splitChange.at(2).split("_").at(0));
                 if (SoundChanges::TryCharacters(word,
-                    wordIndex - beforePartLength
+                    wordIndex + (beforeEnvironmentLength - beforePartLength),
                     0,
                     splitException.at(0),
                     splitChange.at(0),
@@ -148,7 +149,7 @@ bool SoundChanges::TryRule(QString word,
                     0))
                 {
                     if (SoundChanges::TryCharacters(word,
-                        wordIndex
+                        wordIndex + beforeEnvironmentLength,
                         0,
                         "_" + splitException.at(1),
                         splitChange.at(0),
