@@ -136,30 +136,31 @@ bool SoundChanges::TryRule(QString word,
                 QStringList splitException = splitChange.at(i).split("_");
                 int beforePartLength = SoundChanges::ActualLength(splitException.at(0));
                 if (SoundChanges::TryCharacters(word,
-                                                wordIndex - beforePartLength,
-                                                0,
-                                                splitException.at(0),
-                                                splitChange.at(0),
-                                                categories,
-                                                0,
-                                                0,
-                                                0,
-                                                false,
-                                                0)
-                    &&
-                    SoundChanges::TryCharacters(word,
-                                                wordIndex,
-                                                0,
-                                                "_" + splitException.at(1),
-                                                splitChange.at(0),
-                                                categories,
-                                                0,
-                                                0,
-                                                0,
-                                                false,
-                                                0))
+                    wordIndex - beforePartLength
+                    0,
+                    splitException.at(0),
+                    splitChange.at(0),
+                    categories,
+                    0,
+                    0,
+                    0,
+                    false,
+                    0))
                 {
-                    return false;
+                    if (SoundChanges::TryCharacters(word,
+                        wordIndex
+                        0,
+                        "_" + splitException.at(1),
+                        splitChange.at(0),
+                        categories,
+                        0,
+                        0,
+                        0,
+                        false,
+                        0))
+                    {
+                        return false;
+                    }
                 }
             }
         }
