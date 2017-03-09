@@ -344,6 +344,7 @@ bool SoundChanges::TryCharacters(QString word,
                 doesChangeApply &= (didAnyApplyBeforeTilde && !didAnyApplyAfterTilde);
                 curIndex = resetPosition;
                 curState = State::Normal;
+                nonceChars = QList<QChar>();
                 break;
             }
             nonceChars.append(c);
