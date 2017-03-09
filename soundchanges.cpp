@@ -91,6 +91,7 @@ QString SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, QLis
                             lastChar = c1;
                             backreferences.append(c1);
                             nonceChars = QList<QChar>();
+                            state = State::Normal;
                         }
                         else nonceChars.append(c);
                         break;
