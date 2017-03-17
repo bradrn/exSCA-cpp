@@ -337,7 +337,7 @@ bool SoundChanges::TryCharacters(QString word,
                         else             didAnyApplyAfterTilde = true;
                         lastChar = nonceCharParsed;
                         resetPosition = curIndex;
-                        if (outcats) outcats->enqueue(i);
+                        if (recordcats && outcats) outcats->enqueue(i);
                     }
                     curIndex = position;
                 }
@@ -358,7 +358,7 @@ bool SoundChanges::TryCharacters(QString word,
                 if (backreference >= environmentcats.length()) return false;
                 doesChangeApply &= word.at(curIndex) == categories.value(environmentcats.at(backreference).first)
                                                                   .at(environmentcats.at(backreference).second);
-                if (outcats) outcats->enqueue(environmentcats.at(backreference).second);
+                if (recordcats && outcats) outcats->enqueue(environmentcats.at(backreference).second);
                 curIndex++;
             }
             curState = State::Normal;
