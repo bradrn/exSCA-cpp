@@ -319,9 +319,12 @@ bool SoundChanges::TryCharacters(QString word,
                                                              // so if it returns false we can reset it back to position
 
                 int resetPosition = curIndex;                // Index to reset to when done
+                int counter = 0;                             // Value to enqueue
+
                 bool didAnyApplyBeforeTilde = false;
                 bool didAnyApplyAfterTilde = false;
                 bool beforeTilde = true;
+
                 for (int i = 0; i < nonceChars.length(); i++)
                 {
                     QChar c_nonce = nonceChars.at(i);
@@ -331,13 +334,23 @@ bool SoundChanges::TryCharacters(QString word,
                         beforeTilde = false;
                         if (i == 0) didAnyApplyBeforeTilde = true;
                     }
-                    else if (SoundChanges::TryCharacter(word, c_nonce, lastChar, &nonceCharParsed, target, curIndex, categories, 0, 0, 0, recordcats))
+                    else
                     {
-                        if (beforeTilde) didAnyApplyBeforeTilde = true;
-                        else             didAnyApplyAfterTilde = true;
-                        lastChar = nonceCharParsed;
-                        resetPosition = curIndex;
-                        if (recordcats && outcats) outcats->enqueue(i);
+                        QQueue<int> _outcats;
+                        if (SoundChanges::TryCharacter(word, c_nonce, lastChar, &nonceCharParsed, target, curIndex, categories, 0, 0, &_outcats, recordcats))
+                        {
+                            if (beforeTilde) didAnyApplyBeforeTilde = true;
+                            else             didAnyApplyAfterTilde = true;
+                            lastChar = nonceCharParsed;
+                            resetPosition = curIndex;
+                            if (recordcats && outcats)
+                            {
+                                if (_outcats.length() > 0) outcats->append(_outcats.dequeue() + counter);
+                                else                       outcats->enqueue(counter);
+                            }
+                        }
+                        if (categories.contains(c_nonce)) counter += categories.value(c_nonce).count();
+                        else counter++;
                     }
                     curIndex = position;
                 }
