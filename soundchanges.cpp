@@ -138,28 +138,28 @@ bool SoundChanges::TryRule(QString word,
                 int beforePartLength        = SoundChanges::ActualLength(splitException              .at(0));
                 int beforeEnvironmentLength = SoundChanges::ActualLength(splitChange.at(2).split("_").at(0));
                 if (SoundChanges::TryCharacters(word,
-                    wordIndex + (beforeEnvironmentLength - beforePartLength),
-                    0,
-                    splitException.at(0),
-                    splitChange.at(0),
-                    categories,
-                    0,
-                    0,
-                    0,
-                    false,
-                    0))
+                                                wordIndex + (beforeEnvironmentLength - beforePartLength),
+                                                0,
+                                                splitException.at(0),
+                                                splitChange.at(0),
+                                                categories,
+                                                0,
+                                                0,
+                                                0,
+                                                false,
+                                                0))
                 {
                     if (SoundChanges::TryCharacters(word,
-                        wordIndex + beforeEnvironmentLength,
-                        0,
-                        "_" + splitException.at(1),
-                        splitChange.at(0),
-                        categories,
-                        0,
-                        0,
-                        0,
-                        false,
-                        0))
+                                                    wordIndex + beforeEnvironmentLength,
+                                                    0,
+                                                    "_" + splitException.at(1),
+                                                    splitChange.at(0),
+                                                    categories,
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    false,
+                                                    0))
                     {
                         return false;
                     }
