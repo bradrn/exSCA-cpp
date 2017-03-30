@@ -206,7 +206,7 @@ bool SoundChanges::TryCharacters(QString word,
 
     QList<QChar> nonceChars;
     QChar lastChar = ' ';
-    QQueue<std::pair<QChar, int>> environmentcats;
+    QQueue<std::pair<QChar, int>> environmentcats;     // Categories encountered so far
 
     if (chars == "_#")
     {
