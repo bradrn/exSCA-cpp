@@ -253,15 +253,11 @@ bool SoundChanges::TryCharacters(QString word,
                 break;
             }
 
-            if ((curIndex >= word.length() && c != '#')
-             || (curIndex >  word.length() && c == '#')
-             ||  curIndex < 0)
-                return false;
-
             if (categories.contains(c))
             {
                 for (int i = 0; i < categories.value(c).length(); i++)
                 {
+                    if (curIndex < 0 || curIndex >= word.length()) return false;
                     if (word.at(curIndex) == categories.value(c).at(i))
                     {
                         environmentcats.enqueue(std::make_pair(c, i));
