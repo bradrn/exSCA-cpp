@@ -121,6 +121,10 @@ Window::Window()
 
 void Window::DoSoundChanges()
 {
+    bool reverse = false;           // Hard-coded for now
+    QStringList changes = ApplyRewrite(m_rules->toPlainText()).split('\n', QString::SkipEmptyParts);
+    if (reverse) std::reverse(changes.begin(), changes.end());
+
     QStringList result;
     QString syllabifyregexp(SoundChanges::PreProcessRegexp(m_syllabify->text(), *m_categorieslist));
     QString report;
@@ -142,7 +146,7 @@ void Window::DoSoundChanges()
         {
             QStringList subchanged = ApplyRewrite(subword).split(' ', QString::SkipEmptyParts);
 
-            for (QString change : ApplyRewrite(m_rules->toPlainText()).split('\n', QString::SkipEmptyParts))
+            for (QString change : changes)
             {
                 for (QString &_subchanged : subchanged)
                 {
@@ -168,7 +172,7 @@ void Window::DoSoundChanges()
                     }
                     else _change = splitchange.at(0);
                     QString before = _subchanged;
-                    _subchanged = SoundChanges::ApplyChange(_subchanged, _change, *m_categorieslist, prob).join(' ');
+                    _subchanged = SoundChanges::RemoveDuplicates(SoundChanges::ApplyChange(_subchanged, _change, *m_categorieslist, prob, reverse).join(' '));
                     _subchanged.remove(m_syllableseperator->text().at(0));
                     if (_subchanged != before)
                         report.append(QString("<b>%1</b> changed <b>%2</b> to <b>%3</b><br/>").arg(_change, before, _subchanged));

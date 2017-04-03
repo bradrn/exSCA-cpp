@@ -16,11 +16,13 @@ namespace std
 class SoundChanges
 {
 public:
-    static QStringList ApplyChange(QString word, QString change, QMap<QChar, QList<QChar>> categories, int probability);
+    static QStringList ApplyChange(QString word, QString change, QMap<QChar, QList<QChar>> categories, int probability, bool reverse);
 
     static QString PreProcessRegexp(QString regexp, QMap<QChar,QList<QChar>> categories);
 
     static QString Syllabify(QString regexp, QString word, QChar seperator);
+
+    static QString RemoveDuplicates(QString s);
 
     static QStringList Reanalyse(QStringList sl);
 
@@ -31,7 +33,8 @@ private:
                                       QMap<QChar, QList<QChar>> categories,
                                       int *startpos,
                                       int *length,
-                                      QQueue<int> *catnums);
+                                      QQueue<int> *catnums,
+                                      bool reverse);
 
     static bool TryCharacters(QString word,
                               int wordIndex,
@@ -65,6 +68,8 @@ private:
     static int ActualLength(QString rule);
 
     static int MaxLength(QList<std::pair<QString, int>> l);
+
+    static void ReverseFirstTwo(QStringList &l);
 
     enum class State
     {

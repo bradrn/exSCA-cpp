@@ -13,9 +13,10 @@
 #include <random>
 #include "soundchanges.h"
 
-QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, QList<QChar>> categories, int probability)
+QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, QList<QChar>> categories, int probability, bool reverse)
 {
     QStringList splitChange = change.split("/");
+    if (reverse) ReverseFirstTwo(splitChange);
     QList<std::pair<QString, int>> replaced;
     replaced.append(std::make_pair(word, 0));
 
@@ -34,7 +35,7 @@ QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, 
         {
             int _wordIndex = _replaced.second;
             if (_wordIndex > _replaced.first.length()) continue;
-            if (tryRule && SoundChanges::TryRule(_replaced.first, _wordIndex, change, categories, &startpos, &length, &catnums))
+            if (tryRule && SoundChanges::TryRule(_replaced.first, _wordIndex, change, categories, &startpos, &length, &catnums, reverse))
             {
                 if (change.at(0) == '_')
                 {
@@ -150,6 +151,7 @@ QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, 
                         newReplaced.append(std::make_pair(replaced, _replaced.second + replacement.length() - length + 1));
                     }
                 }
+                if (reverse) newReplaced.append(std::make_pair(_replaced.first, _replaced.second + 1));
             }
         }
 
@@ -168,7 +170,13 @@ QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, 
     QStringList result;
     for (std::pair<QString, int> _replaced : replaced)
     {
-        result.append(_replaced.first);
+        bool append = true;
+        if (reverse)
+        {
+            QStringList l = SoundChanges::ApplyChange(_replaced.first, change, categories, probability, false);
+            append = (l.length() == 1) && (l.at(0) == word);
+        }
+        if (append) result.append(_replaced.first);
     }
     return result;
 }
@@ -179,7 +187,8 @@ bool SoundChanges::TryRule(QString word,
                            QMap<QChar, QList<QChar>> categories,
                            int *startpos,
                            int *length,
-                           QQueue<int> *catnums)
+                           QQueue<int> *catnums,
+                           bool reverse)
 {
     QStringList splitChange = change.split("/");
     if (change.at(0) == '_')
@@ -189,6 +198,7 @@ bool SoundChanges::TryRule(QString word,
     }
     else if (splitChange.length() >= 3)
     {
+        if (reverse) ReverseFirstTwo(splitChange);
         if (splitChange.length() > 2)
         {
             for (int i = 3; i < splitChange.length(); i++)
@@ -565,6 +575,13 @@ int SoundChanges::MaxLength(QList<std::pair<QString, int>> l)
     return maxLength;
 }
 
+void SoundChanges::ReverseFirstTwo(QStringList &l)
+{
+    QString t = l.at(0);
+    l[0] = l.at(1);
+    l[1] = t;
+}
+
 QString SoundChanges::PreProcessRegexp(QString regexp, QMap<QChar, QList<QChar>> categories)
 {
     QString result = "";
@@ -599,6 +616,20 @@ QString SoundChanges::Syllabify(QString regexp, QString word, QChar seperator)
     }
     return result;
 }
+
+QString SoundChanges::RemoveDuplicates(QString s)
+{
+    QStringList sl;
+    for (QString _s : s.split(' '))
+    {
+        if (!sl.contains(_s))
+        {
+            sl.append(_s);
+        }
+    }
+    return sl.join(' ');
+}
+
 QStringList SoundChanges::Reanalyse(QStringList sl)
 {
     QStringList result;
