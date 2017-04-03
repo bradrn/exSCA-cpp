@@ -140,43 +140,48 @@ void Window::DoSoundChanges()
         QString changed = "";
         for (QString subword : word.split(' ', QString::SkipEmptyParts))
         {
-            QString subchanged = ApplyRewrite(subword);
+            QStringList subchanged = ApplyRewrite(subword).split(' ', QString::SkipEmptyParts);
 
             for (QString change : ApplyRewrite(m_rules->toPlainText()).split('\n', QString::SkipEmptyParts))
             {
-                QStringList splitchange = change.replace(QRegularExpression(R"(\*.*)"), "").split(' ', QString::SkipEmptyParts);
-                if (splitchange.length() == 0) continue;
-                QString _change;
-                int prob = 100;
-                if (splitchange.length() > 1)
+                for (QString &_subchanged : subchanged)
                 {
-                    _change = splitchange.at(1);
-                    switch (splitchange.at(0).at(0).toLatin1())
+                    QStringList splitchange = change.replace(QRegularExpression(R"(\*.*)"), "").split(' ', QString::SkipEmptyParts);
+                    if (splitchange.length() == 0) continue;
+                    QString _change;
+                    int prob = 100;
+                    if (splitchange.length() > 1)
                     {
-                    case 'x':
-                        subchanged = SoundChanges::Syllabify(syllabifyregexp, subchanged, m_syllableseperator->text().at(0));
-                    case '?':
-                        bool ok;
-                        int _prob = QString(splitchange.at(0).mid(1)).toInt(&ok);
-                        if (ok)
+                        _change = splitchange.at(1);
+                        switch (splitchange.at(0).at(0).toLatin1())
                         {
-                            prob = _prob;
+                        case 'x':
+                            _subchanged = SoundChanges::Syllabify(syllabifyregexp, _subchanged, m_syllableseperator->text().at(0));
+                        case '?':
+                            bool ok;
+                            int _prob = QString(splitchange.at(0).mid(1)).toInt(&ok);
+                            if (ok)
+                            {
+                                prob = _prob;
+                            }
                         }
                     }
+                    else _change = splitchange.at(0);
+                    QString before = _subchanged;
+                    _subchanged = SoundChanges::ApplyChange(_subchanged, _change, *m_categorieslist, prob).join(' ');
+                    _subchanged.remove(m_syllableseperator->text().at(0));
+                    if (_subchanged != before)
+                        report.append(QString("<b>%1</b> changed <b>%2</b> to <b>%3</b><br/>").arg(_change, before, _subchanged));
                 }
-                else _change = splitchange.at(0);
-                QString before = subchanged;
-                subchanged = SoundChanges::ApplyChange(subchanged, _change, *m_categorieslist, prob);
-                subchanged.remove(m_syllableseperator->text().at(0));
-                if (subchanged != before)
-                    report.append(QString("<b>%1</b> changed <b>%2</b> to <b>%3</b><br/>").arg(_change, before, subchanged));
+                subchanged = SoundChanges::Reanalyse(subchanged);
             }
 
-            if (m_doBackwards->isChecked()) subchanged = ApplyRewrite(subchanged, true);
-            if (m_showChangedWords->isChecked() && subchanged != subword) subchanged = QString("<b>").append(subchanged).append("</b>");
+            QString subchangedJoined = subchanged.join(' ');
+            if (m_doBackwards->isChecked()) subchangedJoined = ApplyRewrite(subchangedJoined, true);
+            if (m_showChangedWords->isChecked() && subchangedJoined != subword) subchangedJoined = QString("<b>").append(subchangedJoined).append("</b>");
 
-            if (changed.length() == 0) changed =        subchanged;
-            else                       changed += ' ' + subchanged;
+            if (changed.length() == 0) changed =        subchangedJoined;
+            else                       changed += ' ' + subchangedJoined;
         }
         changed = FormatOutput(word.trimmed(), changed.trimmed(), gloss.trimmed(), hasGloss);
         result.append(changed);
