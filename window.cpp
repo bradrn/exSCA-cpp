@@ -200,7 +200,7 @@ void Window::DoSoundChanges()
             }
             m_progress->setValue(0);
 
-            QString subchangedJoined = subchanged.join(' ');
+            QString subchangedJoined = SoundChanges::Filter(subchanged, m_filters->toPlainText().split('\n', QString::SkipEmptyParts), *m_categorieslist).join(' ');
             if (m_doBackwards->isChecked()) subchangedJoined = ApplyRewrite(subchangedJoined, true);
             if (m_showChangedWords->isChecked() && subchangedJoined != subword) subchangedJoined = QString("<b>").append(subchangedJoined).append("</b>");
 

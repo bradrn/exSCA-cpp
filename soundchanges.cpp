@@ -642,3 +642,18 @@ QStringList SoundChanges::Reanalyse(QStringList sl)
     }
     return result;
 }
+
+QStringList SoundChanges::Filter(QStringList sl, QStringList f, QMap<QChar, QList<QChar>> cats)
+{
+    QStringList result;
+    for (QString s : sl)
+    {
+        bool append = false;
+        for (QString regexp : f)
+        {
+            append |= QRegularExpression(SoundChanges::PreProcessRegexp(regexp, cats)).match(s).hasMatch();
+        }
+        if (!append) result.append(s);
+    }
+    return result;
+}

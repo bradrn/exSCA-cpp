@@ -26,6 +26,8 @@ public:
 
     static QStringList Reanalyse(QStringList sl);
 
+    static QStringList Filter(QStringList sl, QStringList f, QMap<QChar, QList<QChar>> cats);
+
 private:
     static bool SoundChanges::TryRule(QString word,
                                       int wordIndex,
