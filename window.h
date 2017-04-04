@@ -18,6 +18,7 @@ class QStringList;
 class QCheckBox;
 class QMenu;
 class QRadioButton;
+class QProgressBar;
 class Highlighter;
 
 template <class Key, class T> class QMap;
@@ -56,6 +57,13 @@ private:
     QRadioButton *m_squareinputformat;
     QRadioButton *m_squareglossformat;
     QRadioButton *m_arrowglossformat;
+
+    QGroupBox *m_reversegroup;
+    QCheckBox *m_reversechanges;
+    QLabel *m_filterslabel;
+    QPlainTextEdit *m_filters;
+
+    QProgressBar *m_progress;
 
     Highlighter *m_highlighter;
 

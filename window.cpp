@@ -68,7 +68,21 @@ Window::Window()
     m_formatgroup->setLayout(fbox);
     m_midlayout->addWidget(m_formatgroup);
     
+    m_reversegroup = new QGroupBox("Reversing changes");
+    m_reversechanges = new QCheckBox("Reverse changes");
+    m_filters = new QPlainTextEdit;
+    m_filterslabel = new QLabel("Filters:");
+    QVBoxLayout *rbox = new QVBoxLayout;
+    rbox->addWidget(m_reversechanges);
+    rbox->addWidget(m_filterslabel);
+    rbox->addWidget(m_filters);
+    m_reversegroup->setLayout(rbox);
+    m_midlayout->addWidget(m_reversegroup);
+
     m_midlayout->addStretch();
+
+    m_progress = new QProgressBar;
+    m_midlayout->addWidget(m_progress);
 
     m_syllabify = new QLineEdit;
     m_midlayout->addWidget(m_syllabify);
@@ -121,9 +135,13 @@ Window::Window()
 
 void Window::DoSoundChanges()
 {
-    bool reverse = false;           // Hard-coded for now
+    bool reverse = m_reversechanges->isChecked();
     QStringList changes = ApplyRewrite(m_rules->toPlainText()).split('\n', QString::SkipEmptyParts);
     if (reverse) std::reverse(changes.begin(), changes.end());
+
+    m_progress->setMaximum(qMax(1, changes.length()));    // we use qMax to avoid showing a busy indicator when no changes are specified
+    m_progress->setMinimum(0);
+    m_progress->setValue(0);
 
     QStringList result;
     QString syllabifyregexp(SoundChanges::PreProcessRegexp(m_syllabify->text(), *m_categorieslist));
@@ -178,7 +196,9 @@ void Window::DoSoundChanges()
                         report.append(QString("<b>%1</b> changed <b>%2</b> to <b>%3</b><br/>").arg(_change, before, _subchanged));
                 }
                 subchanged = SoundChanges::Reanalyse(subchanged);
+                m_progress->setValue(m_progress->value() + 1);
             }
+            m_progress->setValue(0);
 
             QString subchangedJoined = subchanged.join(' ');
             if (m_doBackwards->isChecked()) subchangedJoined = ApplyRewrite(subchangedJoined, true);
