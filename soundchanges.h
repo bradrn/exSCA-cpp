@@ -16,7 +16,7 @@ namespace std
 class SoundChanges
 {
 public:
-    static QStringList ApplyChange(QString word, QString change, QMap<QChar, QList<QChar>> categories, int probability, bool reverse);
+    static QStringList ApplyChange(QString word, QString change, QMap<QChar, QList<QChar>> categories, int probability, bool reverse, bool alwaysApply);
 
     static QString PreProcessRegexp(QString regexp, QMap<QChar,QList<QChar>> categories);
 

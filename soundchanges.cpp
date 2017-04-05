@@ -13,7 +13,7 @@
 #include <random>
 #include "soundchanges.h"
 
-QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, QList<QChar>> categories, int probability, bool reverse)
+QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, QList<QChar>> categories, int probability, bool reverse, bool alwaysApply)
 {
     QStringList splitChange = change.split("/");
     if (reverse) ReverseFirstTwo(splitChange);
@@ -151,7 +151,7 @@ QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, 
                         newReplaced.append(std::make_pair(replaced, _replaced.second + replacement.length() - length + 1));
                     }
                 }
-                if (reverse) newReplaced.append(std::make_pair(_replaced.first, _replaced.second + 1));
+                if (reverse && !alwaysApply) newReplaced.append(std::make_pair(_replaced.first, _replaced.second + 1));
             }
         }
 
@@ -173,7 +173,7 @@ QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, 
         bool append = true;
         if (reverse)
         {
-            QStringList l = SoundChanges::ApplyChange(_replaced.first, change, categories, probability, false);
+            QStringList l = SoundChanges::ApplyChange(_replaced.first, change, categories, probability, false, false);
             append = (l.length() == 1) && (l.at(0) == word);
         }
         if (append) result.append(_replaced.first);

@@ -166,6 +166,7 @@ void Window::DoSoundChanges()
 
             for (QString change : changes)
             {
+                bool alwaysApply = false;
                 for (QString &_subchanged : subchanged)
                 {
                     QStringList splitchange = change.replace(QRegularExpression(R"(\*.*)"), "").split(' ', QString::SkipEmptyParts);
@@ -180,6 +181,7 @@ void Window::DoSoundChanges()
                         case 'x':
                             _subchanged = SoundChanges::Syllabify(syllabifyregexp, _subchanged, m_syllableseperator->text().at(0));
                         case '?':
+                        {
                             bool ok;
                             int _prob = QString(splitchange.at(0).mid(1)).toInt(&ok);
                             if (ok)
@@ -187,13 +189,22 @@ void Window::DoSoundChanges()
                                 prob = _prob;
                             }
                         }
+                        case 'f':
+                            if (reverse)
+                                goto CONTINUE;
+                        case 'a':
+                            alwaysApply = true;
+                        }
                     }
                     else _change = splitchange.at(0);
-                    QString before = _subchanged;
-                    _subchanged = SoundChanges::RemoveDuplicates(SoundChanges::ApplyChange(_subchanged, _change, *m_categorieslist, prob, reverse).join(' '));
-                    _subchanged.remove(m_syllableseperator->text().at(0));
-                    if (_subchanged != before)
-                        report.append(QString("<b>%1</b> changed <b>%2</b> to <b>%3</b><br/>").arg(_change, before, _subchanged));
+                    {
+                        QString before = _subchanged;
+                        _subchanged = SoundChanges::RemoveDuplicates(SoundChanges::ApplyChange(_subchanged, _change, *m_categorieslist, prob, reverse, alwaysApply).join(' '));
+                        _subchanged.remove(m_syllableseperator->text().at(0));
+                        if (_subchanged != before)
+                            report.append(QString("<b>%1</b> changed <b>%2</b> to <b>%3</b><br/>").arg(_change, before, _subchanged));
+                    }
+                CONTINUE:;
                 }
                 subchanged = SoundChanges::Reanalyse(subchanged);
                 m_progress->setValue(m_progress->value() + 1);
