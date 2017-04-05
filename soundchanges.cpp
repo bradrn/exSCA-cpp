@@ -577,9 +577,12 @@ int SoundChanges::MaxLength(QList<std::pair<QString, int>> l)
 
 void SoundChanges::ReverseFirstTwo(QStringList &l)
 {
-    QString t = l.at(0);
-    l[0] = l.at(1);
-    l[1] = t;
+    if (l.length() >= 2)
+    {
+        QString t = l.at(0);
+        l[0] = l.at(1);
+        l[1] = t;
+    }
 }
 
 QString SoundChanges::PreProcessRegexp(QString regexp, QMap<QChar, QList<QChar>> categories)
