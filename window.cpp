@@ -155,6 +155,7 @@ void Window::DoSoundChanges()
                     {
                     case 'x':
                         subchanged = SoundChanges::Syllabify(syllabifyregexp, subchanged, m_syllableseperator->text().at(0));
+                        break;
                     case '?':
                         bool ok;
                         int _prob = QString(splitchange.at(0).mid(1)).toInt(&ok);
@@ -162,6 +163,7 @@ void Window::DoSoundChanges()
                         {
                             prob = _prob;
                         }
+                        break;
                     }
                 }
                 else _change = splitchange.at(0);
