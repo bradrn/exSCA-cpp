@@ -62,6 +62,7 @@ private:
     QCheckBox *m_reversechanges;
     QLabel *m_filterslabel;
     QPlainTextEdit *m_filters;
+    QPushButton *m_filtercurrent;
 
     QProgressBar *m_progress;
 
@@ -78,6 +79,7 @@ private:
 
 private slots:
     void DoSoundChanges();
+    void FilterCurrent();
     void UpdateCategories();
     void AddFromAffixer(QStringList words, AffixerDialog::PlaceToAdd placeToAdd);
 

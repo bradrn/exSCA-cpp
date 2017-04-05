@@ -72,10 +72,12 @@ Window::Window()
     m_reversechanges = new QCheckBox("Reverse changes");
     m_filters = new QPlainTextEdit;
     m_filterslabel = new QLabel("Filters:");
+    m_filtercurrent = new QPushButton("Filter current");
     QVBoxLayout *rbox = new QVBoxLayout;
     rbox->addWidget(m_reversechanges);
     rbox->addWidget(m_filterslabel);
     rbox->addWidget(m_filters);
+    rbox->addWidget(m_filtercurrent);
     m_reversegroup->setLayout(rbox);
     m_midlayout->addWidget(m_reversegroup);
 
@@ -113,6 +115,7 @@ Window::Window()
 
     connect(m_categories, &QPlainTextEdit::textChanged, this, &Window::UpdateCategories);
     connect(m_apply, &QPushButton::clicked, this, &Window::DoSoundChanges);
+    connect(m_filtercurrent, &QPushButton::clicked, this, &Window::FilterCurrent);
 
     fileMenu = menuBar()->addMenu("File");
     fileMenu->addAction("Open .esc file", this, &Window::OpenEsc);
@@ -232,6 +235,16 @@ void Window::DoSoundChanges()
         msgBox->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
         msgBox->show();
     }
+}
+
+void Window::FilterCurrent()
+{
+    QList<QString> result;
+    for (QString word : m_results->toPlainText().split('\n'))
+    {
+        result.append(SoundChanges::Filter(word.split(' ', QString::SkipEmptyParts), m_filters->toPlainText().split('\n', QString::SkipEmptyParts), *m_categorieslist).join(' '));
+    }
+    m_results->setHtml(result.join("<br/>"));
 }
 
 void Window::UpdateCategories()
