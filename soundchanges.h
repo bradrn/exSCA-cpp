@@ -8,6 +8,12 @@ class QRegularExpression;
 template <class Key, class T> class QMap;
 template <class T> class QList;
 template <class T> class QQueue;
+
+namespace std
+{
+    template <class T1, class T2> struct pair;
+}
+
 class SoundChanges
 {
 public:
@@ -24,7 +30,7 @@ private:
                                       QMap<QChar, QList<QChar>> categories,
                                       int *startpos,
                                       int *length,
-                                      QQueue<int> *catnums);
+                                      QQueue<std::pair<int, QChar>> *catnums);
 
     static bool TryCharacters(QString word,
                               int wordIndex,
@@ -34,7 +40,7 @@ private:
                               QMap<QChar, QList<QChar>> categories,
                               int *startpos,
                               int *length,
-                              QQueue<int> *outcats,
+                              QQueue<std::pair<int, QChar>> *outcats,
                               bool recordcats,
                               QChar *lastCharParsed);
 
@@ -47,7 +53,7 @@ private:
                              QMap<QChar, QList<QChar>> categories,
                              int *startpos,
                              int *length,
-                             QQueue<int> *outcats,
+                             QQueue<std::pair<int, QChar>> *outcats,
                              bool recordcats);
 
     static bool MatchChar(QChar char1,

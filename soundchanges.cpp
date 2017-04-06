@@ -25,7 +25,7 @@ QString SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, QLis
     for (int wordIndex = 0; wordIndex <= replaced.length(); wordIndex++)  // '<= word.length()' and not '< word.length()' because material can be added to the end of the word (e.g. '/XYZ/_#')
     {
         int startpos, length;
-        QQueue<int> catnums;
+        QQueue<std::pair<int, QChar>> catnums;
         bool tryRule = true;
         if (rand(gen) >= (probability / 100.0)) tryRule = false;
         if (tryRule && SoundChanges::TryRule(replaced, wordIndex, change, categories, &startpos, &length, &catnums))
@@ -54,7 +54,12 @@ QString SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, QLis
                         if (categories.contains(c))
                         {
                             QChar c1;
-                            if (catnums.length() > 0) c1 = categories.value(c).at(catnums.dequeue());
+                            if (catnums.length() > 0)
+                            {
+                                std::pair<int, QChar> deq = catnums.dequeue();
+                                if (categories.value(c).length() > deq.first) c1 = categories.value(c).at(deq.first);
+                                else c1 = deq.second;
+                            }
                             else c1 = ' ';
                             replacement.append(c1);
                             lastChar = c1;
@@ -86,7 +91,11 @@ QString SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, QLis
                     case State::Nonce:
                         if (c == ']')
                         {
-                            QChar c1 = nonceChars.at(catnums.dequeue());
+                            QChar c1;
+                            std::pair<int, QChar> deq = catnums.dequeue();
+                            if (nonceChars.length() > deq.first) c1 = nonceChars.at(deq.first);
+                            else c1 = deq.second;
+
                             replacement.append(c1);
                             lastChar = c1;
                             backreferences.append(c1);
@@ -120,7 +129,7 @@ bool SoundChanges::TryRule(QString word,
                            QMap<QChar, QList<QChar>> categories,
                            int *startpos,
                            int *length,
-                           QQueue<int> *catnums)
+                           QQueue<std::pair<int, QChar>> *catnums)
 {
     QStringList splitChange = change.split("/");
     if (change.at(0) == '_')
@@ -190,7 +199,7 @@ bool SoundChanges::TryCharacters(QString word,
                                  QMap<QChar, QList<QChar>> categories,
                                  int *startpos,
                                  int *length,
-                                 QQueue<int> *outcats,
+                                 QQueue<std::pair<int, QChar>> *outcats,
                                  bool recordcats,
                                  QChar *lastCharParsed)
 {
@@ -332,7 +341,7 @@ bool SoundChanges::TryCharacters(QString word,
                     }
                     else
                     {
-                        QQueue<int> _outcats;
+                        QQueue<std::pair<int, QChar>> _outcats;
                         if (SoundChanges::TryCharacter(word, c_nonce, lastChar, &nonceCharParsed, target, curIndex, categories, 0, 0, &_outcats, recordcats))
                         {
                             if (beforeTilde) didAnyApplyBeforeTilde = true;
@@ -341,8 +350,8 @@ bool SoundChanges::TryCharacters(QString word,
                             resetPosition = curIndex;
                             if (recordcats && outcats)
                             {
-                                if (_outcats.length() > 0) outcats->append(_outcats.dequeue() + counter);
-                                else                       outcats->enqueue(counter);
+                                if (_outcats.length() > 0) outcats->append(std::make_pair(_outcats.dequeue().first + counter, c_nonce));
+                                else                       outcats->enqueue(std::make_pair(counter, c_nonce));
                             }
                         }
                         if (categories.contains(c_nonce)) counter += categories.value(c_nonce).count();
@@ -365,9 +374,9 @@ bool SoundChanges::TryCharacters(QString word,
             {
                 if (curIndex >= word.length() || curIndex < 0) return false;
                 if (backreference >= environmentcats.length()) return false;
-                doesChangeApply &= word.at(curIndex) == categories.value(environmentcats.at(backreference).first)
-                                                                  .at(environmentcats.at(backreference).second);
-                if (recordcats && outcats) outcats->enqueue(environmentcats.at(backreference).second);
+                QChar c1 = categories.value(environmentcats.at(backreference).first).at(environmentcats.at(backreference).second);
+                doesChangeApply &= word.at(curIndex) == c;
+                if (recordcats && outcats) outcats->enqueue(std::make_pair(environmentcats.at(backreference).second, c));
                 curIndex++;
             }
             curState = State::Normal;
@@ -388,7 +397,7 @@ bool SoundChanges::TryCharacter(QString word,
                                 QMap<QChar, QList<QChar>> categories,
                                 int *startpos,
                                 int *length,
-                                QQueue<int> *outcats,
+                                QQueue<std::pair<int, QChar>> *outcats,
                                 bool recordcats)
     // we pass startpos, length, outcats by reference so we can pass a null pointer if we don't need them
 {
@@ -416,7 +425,7 @@ bool SoundChanges::TryCharacter(QString word,
         int catnum;
         if (curIndex >= word.length() || curIndex < 0) return false;
         doesChangeApply &= SoundChanges::MatchChar(word.at(curIndex), c, categories, &catnum);
-        if (categories.contains(c) && recordcats && outcats) outcats->enqueue(catnum);
+        if (categories.contains(c) && recordcats && outcats) outcats->enqueue(std::make_pair(catnum, categories.value(c).at(catnum)));
         *lastCharParsed = word.at(curIndex);
         curIndex++;
         break;
