@@ -421,6 +421,8 @@ bool SoundChanges::TryCharacter(QString word,
         *lastCharParsed = lastChar;
         curIndex++;
         break;
+    case '~':
+        break;          // we ignore tildes in environment and target
     default:
         int catnum;
         if (curIndex >= word.length() || curIndex < 0) return false;
