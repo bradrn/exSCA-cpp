@@ -91,9 +91,11 @@ QString SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, QLis
                     case State::Nonce:
                         if (c == ']')
                         {
+                            std::pair<QString, bool> parsedChars = SoundChanges::ParseNonce(nonceChars, categories);
+
                             QChar c1;
                             std::pair<int, QChar> deq = catnums.dequeue();
-                            if (nonceChars.length() > deq.first) c1 = nonceChars.at(deq.first);
+                            if (parsedChars.first.length() > deq.first) c1 = parsedChars.first.at(deq.first);
                             else c1 = deq.second;
 
                             replacement.append(c1);
@@ -324,42 +326,33 @@ bool SoundChanges::TryCharacters(QString word,
                                                              // so if it returns false we can reset it back to position
 
                 int resetPosition = curIndex;                // Index to reset to when done
-                int counter = 0;                             // Value to enqueue
 
-                bool didAnyApplyBeforeTilde = false;
-                bool didAnyApplyAfterTilde = false;
-                bool beforeTilde = true;
+                bool didAnyApply = false;
 
-                for (int i = 0; i < nonceChars.length(); i++)
+                std::pair<QString, bool> parsedChars = SoundChanges::ParseNonce(nonceChars, categories);
+
+                for (int i = 0; i < parsedChars.first.length(); i++)
                 {
-                    QChar c_nonce = nonceChars.at(i);
+                    QChar c_nonce = parsedChars.first.at(i);;
                     QChar nonceCharParsed = ' ';
-                    if (c_nonce == '~')
+                    QQueue<std::pair<int, QChar>> _outcats;
+                    if (SoundChanges::TryCharacter(word, c_nonce, lastChar, &nonceCharParsed, target, curIndex, categories, 0, 0, &_outcats, recordcats))
                     {
-                        beforeTilde = false;
-                        if (i == 0) didAnyApplyBeforeTilde = true;
-                    }
-                    else
-                    {
-                        QQueue<std::pair<int, QChar>> _outcats;
-                        if (SoundChanges::TryCharacter(word, c_nonce, lastChar, &nonceCharParsed, target, curIndex, categories, 0, 0, &_outcats, recordcats))
+                        didAnyApply = true;
+                        lastChar = nonceCharParsed;
+                        resetPosition = curIndex;
+                        if (recordcats && outcats)
                         {
-                            if (beforeTilde) didAnyApplyBeforeTilde = true;
-                            else             didAnyApplyAfterTilde = true;
-                            lastChar = nonceCharParsed;
-                            resetPosition = curIndex;
-                            if (recordcats && outcats)
-                            {
-                                if (_outcats.length() > 0) outcats->append(std::make_pair(_outcats.dequeue().first + counter, c_nonce));
-                                else                       outcats->enqueue(std::make_pair(counter, c_nonce));
-                            }
+                            if (_outcats.length() > 0) outcats->append(std::make_pair(_outcats.dequeue().first, c_nonce));
+                            else                       outcats->enqueue(std::make_pair(i, c_nonce));
                         }
-                        if (categories.contains(c_nonce)) counter += categories.value(c_nonce).count();
-                        else counter++;
+                        break;
                     }
                     curIndex = position;
                 }
-                doesChangeApply &= (didAnyApplyBeforeTilde && !didAnyApplyAfterTilde);
+
+                if (parsedChars.second) doesChangeApply &= didAnyApply;
+                else                    doesChangeApply &= !didAnyApply;
                 curIndex = resetPosition;
                 curState = State::Normal;
                 nonceChars = QList<QChar>();
@@ -453,6 +446,46 @@ bool SoundChanges::MatchChar(QChar char1, QChar char2, QMap<QChar, QList<QChar>>
         return false;
     }
     return char1 == char2;
+}
+
+std::pair<QString, bool> SoundChanges::ParseNonce(QList<QChar> nonce, QMap<QChar, QList<QChar>> categories)
+{
+    QList<QChar> beforeTilde, afterTilde;
+    bool hasTildeOcurred = false;
+
+    for (QChar c : nonce)
+    {
+        switch (c.toLatin1())
+        {
+        case '~':
+            hasTildeOcurred = true;
+            break;
+        default:
+            if (categories.contains(c))
+            {
+                QList<QChar> cl = categories.value(c);
+                for (QChar _c : cl)
+                {
+                    if (hasTildeOcurred) afterTilde .append(_c);
+                    else                 beforeTilde.append(_c);
+                }
+            }
+            else
+            {
+                if (hasTildeOcurred) afterTilde .append(c);
+                else                 beforeTilde.append(c);
+            }
+        }
+    }
+
+    QString result;
+    for (QChar c : beforeTilde)
+    {
+        if (afterTilde.contains(c)) continue;
+        result.append(c);
+    }
+
+    return std::make_pair(result, beforeTilde.length() != 0);
 }
 
 int SoundChanges::ActualLength(QString rule)

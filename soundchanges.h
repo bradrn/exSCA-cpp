@@ -61,6 +61,8 @@ private:
                           QMap<QChar, QList<QChar>> categories,
                           int *catnum);
 
+    static std::pair<QString, bool> ParseNonce(QList<QChar> nonce, QMap<QChar, QList<QChar>> categories);
+
     static int ActualLength(QString rule);
 
     enum class State
