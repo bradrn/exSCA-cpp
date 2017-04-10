@@ -183,6 +183,7 @@ void Window::DoSoundChanges()
                         {
                         case 'x':
                             _subchanged = SoundChanges::Syllabify(syllabifyregexp, _subchanged, m_syllableseperator->text().at(0));
+                            break;
                         case '?':
                         {
                             bool ok;
@@ -191,12 +192,14 @@ void Window::DoSoundChanges()
                             {
                                 prob = _prob;
                             }
+                            break;
                         }
                         case 'f':
                             if (reverse)
                                 goto CONTINUE;
                         case 'a':
                             alwaysApply = true;
+                            break;
                         }
                         break;
                     }
