@@ -18,6 +18,7 @@ class QStringList;
 class QCheckBox;
 class QMenu;
 class QRadioButton;
+class QProgressBar;
 class Highlighter;
 
 template <class Key, class T> class QMap;
@@ -57,6 +58,14 @@ private:
     QRadioButton *m_squareglossformat;
     QRadioButton *m_arrowglossformat;
 
+    QGroupBox *m_reversegroup;
+    QCheckBox *m_reversechanges;
+    QLabel *m_filterslabel;
+    QPlainTextEdit *m_filters;
+    QPushButton *m_filtercurrent;
+
+    QProgressBar *m_progress;
+
     Highlighter *m_highlighter;
 
     QMap<QChar, QList<QChar>> *m_categorieslist;
@@ -70,6 +79,7 @@ private:
 
 private slots:
     void DoSoundChanges();
+    void FilterCurrent();
     void UpdateCategories();
     void AddFromAffixer(QStringList words, AffixerDialog::PlaceToAdd placeToAdd);
 

@@ -13,116 +13,184 @@
 #include <random>
 #include "soundchanges.h"
 
-QString SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, QList<QChar>> categories, int probability)
+QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, QList<QChar>> categories, int probability, bool reverse, bool alwaysApply)
 {
     QStringList splitChange = change.split("/");
-    QString replaced = word;
+    if (reverse) ReverseFirstTwo(splitChange);
+    QList<std::pair<QString, int>> replaced;
+    replaced.append(std::make_pair(word, 0));
 
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> rand;                 // used when rule begins with '?'
 
-    for (int wordIndex = 0; wordIndex <= replaced.length(); wordIndex++)  // '<= word.length()' and not '< word.length()' because material can be added to the end of the word (e.g. '/XYZ/_#')
+    for (int wordIndex = 0; wordIndex <= MaxLength(replaced); wordIndex++) // '<=' and not '<' because material can be added to the end of the word (e.g. '/XYZ/_#')
     {
         int startpos, length;
         QQueue<std::pair<int, QChar>> catnums;
         bool tryRule = true;
         if (rand(gen) >= (probability / 100.0)) tryRule = false;
-        if (tryRule && SoundChanges::TryRule(replaced, wordIndex, change, categories, &startpos, &length, &catnums))
+        QList<std::pair<QString, int>> newReplaced;
+        for (std::pair<QString, int> _replaced : replaced)
         {
-            if (change.at(0) == '_')
+            int _wordIndex = _replaced.second;
+            if (_wordIndex > _replaced.first.length()) continue;
+            if (tryRule && SoundChanges::TryRule(_replaced.first, _wordIndex, change, categories, &startpos, &length, &catnums, reverse))
             {
-                if (splitChange.length() == 2)
+                if (change.at(0) == '_')
                 {
-                    QRegularExpression regexp = QRegularExpression(PreProcessRegexp(splitChange.at(0).mid(1), categories));
-                    replaced = replaced.replace(regexp, splitChange.at(1));
-                }
-            }
-            else
-            {
-                QString replacement = "";
-                QChar lastChar = ' ';
-                QList<QChar> backreferences;
-                State state = State::Normal;
-                QList<QChar> nonceChars;
-
-                for (QChar c : splitChange.at(1))
-                {
-                    switch (state)
+                    if (splitChange.length() == 2)
                     {
-                    case State::Normal:
-                        if (categories.contains(c))
+                        if (reverse) newReplaced.append(_replaced);  // we can't reverse regexes yet, so we make sure
+                        else                                         // we handle them properly
                         {
-                            QChar c1;
-                            if (catnums.length() > 0)
-                            {
-                                std::pair<int, QChar> deq = catnums.dequeue();
-                                if (categories.value(c).length() > deq.first) c1 = categories.value(c).at(deq.first);
-                                else c1 = deq.second;
-                            }
-                            else c1 = ' ';
-                            replacement.append(c1);
-                            lastChar = c1;
-                            backreferences.append(c1);
+                            QRegularExpression regexp = QRegularExpression(PreProcessRegexp(splitChange.at(0).mid(1), categories));
+                            newReplaced.append(std::make_pair(_replaced.first.replace(regexp, splitChange.at(1)), _replaced.second));
                         }
-                        else if (c == '\\')
-                        {
-                            QString wordSegment = word.mid(startpos, length);
-                            for (int i = wordSegment.length() - 1; i >= 0; i--)
-                            {
-                                replacement.append(wordSegment.at(i));
-                            }
-                            lastChar = wordSegment.at(wordSegment.length() - 1);
-                        }
-                        else if (c == '>')
-                        {
-                            replacement.append(lastChar);
-                            // no change in lastChar
-                        }
-                        else if (c == '~') catnums.dequeue();
-                        else if (c == '@') state = State::Backreference;
-                        else if (c == '[') state = State::Nonce;
-                        else
-                        {
-                            replacement.append(c);
-                            lastChar = c;
-                        }
-                        break;
-                    case State::Nonce:
-                        if (c == ']')
-                        {
-                            std::pair<QString, bool> parsedChars = SoundChanges::ParseNonce(nonceChars, categories);
-
-                            QChar c1;
-                            std::pair<int, QChar> deq = catnums.dequeue();
-                            if (parsedChars.first.length() > deq.first) c1 = parsedChars.first.at(deq.first);
-                            else c1 = deq.second;
-
-                            replacement.append(c1);
-                            lastChar = c1;
-                            backreferences.append(c1);
-                            nonceChars = QList<QChar>();
-                            state = State::Normal;
-                        }
-                        else nonceChars.append(c);
-                        break;
-                    case State::Backreference:
-                        bool ok = false;
-                        int backreference = QString(c).toInt(&ok) - 1;  // We start at '@1' but this corresponds to index 0 so we subtract 1
-                        if (ok)
-                        {
-                            replacement.append(backreferences.at(backreference));
-                        }
-                        state = State::Normal;
-                        break;
                     }
                 }
-                replaced = replaced.replace(startpos, length, replacement);
-                wordIndex += replacement.length() - length;
+                else
+                {
+                    QStringList replacements("");
+                    QStringList newReplacements;
+                    QChar lastChar = ' ';
+                    QList<QChar> backreferences;
+                    State state = State::Normal;
+                    QList<QChar> nonceChars;
+
+                    for (QChar c : splitChange.at(1))
+                    {
+                        for (QString &replacement : replacements)
+                        {
+                            switch (state)
+                            {
+                            case State::Normal:
+                                if (categories.contains(c))
+                                {
+                                    if (catnums.length() > 0)
+                                    {
+                                        QChar c1;
+                                        std::pair<int, QChar> deq = catnums.dequeue();
+                                        if (categories.value(c).length() > deq.first) c1 = categories.value(c).at(deq.first);
+                                        else c1 = deq.second;
+
+                                        replacement.append(c1);
+                                        lastChar = c1;
+                                        backreferences.append(c1);
+                                    }
+                                    else
+                                    {
+                                        for (QChar c1 : categories.value(c))
+                                        {
+                                            newReplacements.append(replacement + c1);
+                                        }
+                                    }
+                                }
+                                else if (c == '\\')
+                                {
+                                    QString wordSegment = word.mid(startpos, length);
+                                    for (int i = wordSegment.length() - 1; i >= 0; i--)
+                                    {
+                                        replacement.append(wordSegment.at(i));
+                                    }
+                                    lastChar = wordSegment.at(wordSegment.length() - 1);
+                                }
+                                else if (c == '>')
+                                {
+                                    replacement.append(lastChar);
+                                    // no change in lastChar
+                                }
+                                else if (c == '~') catnums.dequeue();
+                                else if (c == '@') state = State::Backreference;
+                                else if (c == '[') state = State::Nonce;
+                                else
+                                {
+                                    replacement.append(c);
+                                    lastChar = c;
+                                }
+                                break;
+                            case State::Nonce:
+                                if (c == ']')
+                                {
+                                    std::pair<QString, bool> parsedChars = SoundChanges::ParseNonce(nonceChars, categories);
+                                    if (catnums.length() > 0)
+                                    {
+                                        QChar c1;
+                                        std::pair<int, QChar> deq = catnums.dequeue();
+                                        if (parsedChars.first.length() > deq.first) c1 = parsedChars.first.at(deq.first);
+                                        else c1 = deq.second;
+
+                                        replacement.append(c1);
+                                        lastChar = c1;
+                                        backreferences.append(c1);
+                                        nonceChars = QList<QChar>();
+                                    }
+                                    else
+                                    {
+                                        for (QChar c1 : parsedChars.first)
+                                        {
+                                            newReplacements.append(replacement + c1);
+                                        }
+                                    }
+                                    state = State::Normal;
+                                }
+                                else nonceChars.append(c);
+                                break;
+                            case State::Backreference:
+                                bool ok = false;
+                                int backreference = QString(c).toInt(&ok) - 1;  // We start at '@1' but this corresponds to index 0 so we subtract 1
+                                if (ok)
+                                {
+                                    replacement.append(backreferences.at(backreference));
+                                }
+                                state = State::Normal;
+                                break;
+                            }
+                        }
+
+                        if (newReplacements.length() > 0)
+                        {
+                            replacements = newReplacements;
+                            newReplacements = QStringList();
+                        }
+                    }
+
+                    for (QString replacement : replacements)
+                    {
+                        // so 'first.replace()' doesn't modify _replaced.first
+                        QString first(_replaced.first);
+                        QString replaced = first.replace(startpos, length, replacement);
+                        newReplaced.append(std::make_pair(replaced, _replaced.second + replacement.length() - length + 1));
+                    }
+                }
+                if (reverse && !alwaysApply) newReplaced.append(std::make_pair(_replaced.first, _replaced.second + 1));
             }
         }
+
+        if (newReplaced.length() == 0)
+        {
+            // even if we aren't replacing anything, we still need to make sure we add one to the current position
+            for (std::pair<QString, int> _replaced : replaced)
+            {
+                newReplaced.append(std::make_pair(_replaced.first, _replaced.second + 1));
+            }
+        }
+        replaced = newReplaced;
+        newReplaced = QList<std::pair<QString, int>>();
     }
-    return replaced;
+
+    QStringList result;
+    for (std::pair<QString, int> _replaced : replaced)
+    {
+        bool append = true;
+        if (reverse)
+        {
+            QStringList l = SoundChanges::ApplyChange(_replaced.first, change, categories, probability, false, false);
+            append = (l.length() == 1) && (l.at(0) == word);
+        }
+        if (append) result.append(_replaced.first);
+    }
+    return result;
 }
 
 bool SoundChanges::TryRule(QString word,
@@ -131,7 +199,8 @@ bool SoundChanges::TryRule(QString word,
                            QMap<QChar, QList<QChar>> categories,
                            int *startpos,
                            int *length,
-                           QQueue<std::pair<int, QChar>> *catnums)
+                           QQueue<std::pair<int, QChar>> *catnums,
+                           bool reverse)
 {
     QStringList splitChange = change.split("/");
     if (change.at(0) == '_')
@@ -141,6 +210,7 @@ bool SoundChanges::TryRule(QString word,
     }
     else if (splitChange.length() >= 3)
     {
+        if (reverse) ReverseFirstTwo(splitChange);
         if (splitChange.length() > 2)
         {
             for (int i = 3; i < splitChange.length(); i++)
@@ -539,6 +609,27 @@ int SoundChanges::ActualLength(QString rule)
     return length;
 }
 
+int SoundChanges::MaxLength(QList<std::pair<QString, int>> l)
+{
+    int maxLength = 0;
+    for (std::pair<QString, int> s : l)
+    {
+        int length = s.first.length();
+        if (length > maxLength) maxLength = length;
+    }
+    return maxLength;
+}
+
+void SoundChanges::ReverseFirstTwo(QStringList &l)
+{
+    if (l.length() >= 2)
+    {
+        QString t = l.at(0);
+        l[0] = l.at(1);
+        l[1] = t;
+    }
+}
+
 QString SoundChanges::PreProcessRegexp(QString regexp, QMap<QChar, QList<QChar>> categories)
 {
     QString result = "";
@@ -570,6 +661,47 @@ QString SoundChanges::Syllabify(QString regexp, QString word, QChar seperator)
         word.remove(_regexp);
         if (first) first = false;
         match = _regexp.match(word);
+    }
+    return result;
+}
+
+QString SoundChanges::RemoveDuplicates(QString s)
+{
+    QStringList sl;
+    for (QString _s : s.split(' '))
+    {
+        if (!sl.contains(_s))
+        {
+            sl.append(_s);
+        }
+    }
+    return sl.join(' ');
+}
+
+QStringList SoundChanges::Reanalyse(QStringList sl)
+{
+    QStringList result;
+    for (QString s : sl)
+    {
+        for (QString _s : s.split(' ', QString::SkipEmptyParts))
+        {
+            if (!result.contains(_s)) result.append(_s);
+        }
+    }
+    return result;
+}
+
+QStringList SoundChanges::Filter(QStringList sl, QStringList f, QMap<QChar, QList<QChar>> cats)
+{
+    QStringList result;
+    for (QString s : sl)
+    {
+        bool append = false;
+        for (QString regexp : f)
+        {
+            append |= QRegularExpression(SoundChanges::PreProcessRegexp(regexp, cats)).match(s).hasMatch();
+        }
+        if (!append) result.append(s);
     }
     return result;
 }

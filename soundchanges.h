@@ -3,6 +3,7 @@
 
 
 class QString;
+class QStringList;
 class QChar;
 class QRegularExpression;
 template <class Key, class T> class QMap;
@@ -17,11 +18,17 @@ namespace std
 class SoundChanges
 {
 public:
-    static QString ApplyChange(QString word, QString change, QMap<QChar, QList<QChar>> categories, int probability);
+    static QStringList ApplyChange(QString word, QString change, QMap<QChar, QList<QChar>> categories, int probability, bool reverse, bool alwaysApply);
 
     static QString PreProcessRegexp(QString regexp, QMap<QChar,QList<QChar>> categories);
 
     static QString Syllabify(QString regexp, QString word, QChar seperator);
+
+    static QString RemoveDuplicates(QString s);
+
+    static QStringList Reanalyse(QStringList sl);
+
+    static QStringList Filter(QStringList sl, QStringList f, QMap<QChar, QList<QChar>> cats);
 
 private:
     static bool SoundChanges::TryRule(QString word,
@@ -30,7 +37,8 @@ private:
                                       QMap<QChar, QList<QChar>> categories,
                                       int *startpos,
                                       int *length,
-                                      QQueue<std::pair<int, QChar>> *catnums);
+                                      QQueue<std::pair<int, QChar>> *catnums,
+                                      bool reverse);
 
     static bool TryCharacters(QString word,
                               int wordIndex,
@@ -64,6 +72,10 @@ private:
     static std::pair<QString, bool> ParseNonce(QList<QChar> nonce, QMap<QChar, QList<QChar>> categories);
 
     static int ActualLength(QString rule);
+
+    static int MaxLength(QList<std::pair<QString, int>> l);
+
+    static void ReverseFirstTwo(QStringList &l);
 
     enum class State
     {

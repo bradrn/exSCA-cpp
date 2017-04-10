@@ -68,7 +68,23 @@ Window::Window()
     m_formatgroup->setLayout(fbox);
     m_midlayout->addWidget(m_formatgroup);
     
+    m_reversegroup = new QGroupBox("Reversing changes");
+    m_reversechanges = new QCheckBox("Reverse changes");
+    m_filters = new QPlainTextEdit;
+    m_filterslabel = new QLabel("Filters:");
+    m_filtercurrent = new QPushButton("Filter current");
+    QVBoxLayout *rbox = new QVBoxLayout;
+    rbox->addWidget(m_reversechanges);
+    rbox->addWidget(m_filterslabel);
+    rbox->addWidget(m_filters);
+    rbox->addWidget(m_filtercurrent);
+    m_reversegroup->setLayout(rbox);
+    m_midlayout->addWidget(m_reversegroup);
+
     m_midlayout->addStretch();
+
+    m_progress = new QProgressBar;
+    m_midlayout->addWidget(m_progress);
 
     m_syllabify = new QLineEdit;
     m_midlayout->addWidget(m_syllabify);
@@ -99,6 +115,7 @@ Window::Window()
 
     connect(m_categories, &QPlainTextEdit::textChanged, this, &Window::UpdateCategories);
     connect(m_apply, &QPushButton::clicked, this, &Window::DoSoundChanges);
+    connect(m_filtercurrent, &QPushButton::clicked, this, &Window::FilterCurrent);
 
     fileMenu = menuBar()->addMenu("File");
     fileMenu->addAction("Open .esc file", this, &Window::OpenEsc);
@@ -121,6 +138,14 @@ Window::Window()
 
 void Window::DoSoundChanges()
 {
+    bool reverse = m_reversechanges->isChecked();
+    QStringList changes = ApplyRewrite(m_rules->toPlainText()).split('\n', QString::SkipEmptyParts);
+    if (reverse) std::reverse(changes.begin(), changes.end());
+
+    m_progress->setMaximum(qMax(1, changes.length()));    // we use qMax to avoid showing a busy indicator when no changes are specified
+    m_progress->setMinimum(0);
+    m_progress->setValue(0);
+
     QStringList result;
     QString syllabifyregexp(SoundChanges::PreProcessRegexp(m_syllabify->text(), *m_categorieslist));
     QString report;
@@ -140,45 +165,64 @@ void Window::DoSoundChanges()
         QString changed = "";
         for (QString subword : word.split(' ', QString::SkipEmptyParts))
         {
-            QString subchanged = ApplyRewrite(subword);
+            QStringList subchanged = ApplyRewrite(subword).split(' ', QString::SkipEmptyParts);
 
-            for (QString change : ApplyRewrite(m_rules->toPlainText()).split('\n', QString::SkipEmptyParts))
+            for (QString change : changes)
             {
-                QStringList splitchange = change.replace(QRegularExpression(R"(\*.*)"), "").split(' ', QString::SkipEmptyParts);
-                if (splitchange.length() == 0) continue;
-                QString _change;
-                int prob = 100;
-                if (splitchange.length() > 1)
+                bool alwaysApply = false;
+                for (QString &_subchanged : subchanged)
                 {
-                    _change = splitchange.at(1);
-                    switch (splitchange.at(0).at(0).toLatin1())
+                    QStringList splitchange = change.replace(QRegularExpression(R"(\*.*)"), "").split(' ', QString::SkipEmptyParts);
+                    if (splitchange.length() == 0) continue;
+                    QString _change;
+                    int prob = 100;
+                    if (splitchange.length() > 1)
                     {
-                    case 'x':
-                        subchanged = SoundChanges::Syllabify(syllabifyregexp, subchanged, m_syllableseperator->text().at(0));
-                        break;
-                    case '?':
-                        bool ok;
-                        int _prob = QString(splitchange.at(0).mid(1)).toInt(&ok);
-                        if (ok)
+                        _change = splitchange.at(1);
+                        switch (splitchange.at(0).at(0).toLatin1())
                         {
-                            prob = _prob;
+                        case 'x':
+                            _subchanged = SoundChanges::Syllabify(syllabifyregexp, _subchanged, m_syllableseperator->text().at(0));
+                        case '?':
+                        {
+                            bool ok;
+                            int _prob = QString(splitchange.at(0).mid(1)).toInt(&ok);
+                            if (ok)
+                            {
+                                prob = _prob;
+                            }
+                        }
+                        case 'f':
+                            if (reverse)
+                                goto CONTINUE;
+                        case 'a':
+                            alwaysApply = true;
                         }
                         break;
                     }
+                    else _change = splitchange.at(0);
+
+                    // Block is so no compiler error occurs: "Initialization of 'before' is skipped by 'goto CONTINUE'
+                    {
+                        QString before = _subchanged;
+                        _subchanged = SoundChanges::RemoveDuplicates(SoundChanges::ApplyChange(_subchanged, _change, *m_categorieslist, prob, reverse, alwaysApply).join(' '));
+                        _subchanged.remove(m_syllableseperator->text().at(0));
+                        if (_subchanged != before)
+                            report.append(QString("<b>%1</b> changed <b>%2</b> to <b>%3</b><br/>").arg(_change, before, _subchanged));
+                    }
+                CONTINUE:;
                 }
-                else _change = splitchange.at(0);
-                QString before = subchanged;
-                subchanged = SoundChanges::ApplyChange(subchanged, _change, *m_categorieslist, prob);
-                subchanged.remove(m_syllableseperator->text().at(0));
-                if (subchanged != before)
-                    report.append(QString("<b>%1</b> changed <b>%2</b> to <b>%3</b><br/>").arg(_change, before, subchanged));
+                subchanged = SoundChanges::Reanalyse(subchanged);
+                m_progress->setValue(m_progress->value() + 1);
             }
+            m_progress->setValue(0);
 
-            if (m_doBackwards->isChecked()) subchanged = ApplyRewrite(subchanged, true);
-            if (m_showChangedWords->isChecked() && subchanged != subword) subchanged = QString("<b>").append(subchanged).append("</b>");
+            QString subchangedJoined = SoundChanges::Filter(subchanged, m_filters->toPlainText().split('\n', QString::SkipEmptyParts), *m_categorieslist).join(' ');
+            if (m_doBackwards->isChecked()) subchangedJoined = ApplyRewrite(subchangedJoined, true);
+            if (m_showChangedWords->isChecked() && subchangedJoined != subword) subchangedJoined = QString("<b>").append(subchangedJoined).append("</b>");
 
-            if (changed.length() == 0) changed =        subchanged;
-            else                       changed += ' ' + subchanged;
+            if (changed.length() == 0) changed =        subchangedJoined;
+            else                       changed += ' ' + subchangedJoined;
         }
         changed = FormatOutput(word.trimmed(), changed.trimmed(), gloss.trimmed(), hasGloss);
         result.append(changed);
@@ -194,6 +238,16 @@ void Window::DoSoundChanges()
         msgBox->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
         msgBox->show();
     }
+}
+
+void Window::FilterCurrent()
+{
+    QList<QString> result;
+    for (QString word : m_results->toPlainText().split('\n'))
+    {
+        result.append(SoundChanges::Filter(word.split(' ', QString::SkipEmptyParts), m_filters->toPlainText().split('\n', QString::SkipEmptyParts), *m_categorieslist).join(' '));
+    }
+    m_results->setHtml(result.join("<br/>"));
 }
 
 void Window::UpdateCategories()
