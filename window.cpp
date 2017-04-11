@@ -456,7 +456,7 @@ void Window::SaveLex()
 
 void Window::LaunchAboutBox()
 {
-    QMessageBox::about(this, "About exSCA", "<b>exSCA</b><br/>Version 2.0.3<br/>Copyright &copy; Brad Neimann 2017");
+    QMessageBox::about(this, "About exSCA", "<b>exSCA</b><br/>Version 2.1.0<br/>Copyright &copy; Brad Neimann 2017");
 }
 
 void Window::LaunchAboutQt()
