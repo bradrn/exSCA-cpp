@@ -20,22 +20,23 @@ void Highlighter::MakeHighlightingRules(QString categoryregexp)
 
     blackformat = QTextCharFormat();
     blackformat.setFontWeight(QFont::Bold);
-    highlightingRules.append({ QRegularExpression("/"), blackformat });
 
     blueformat = QTextCharFormat();
     blueformat.setForeground(QColor(0, 0, 255));
-    highlightingRules.append({ QRegularExpression(R"(@\d|_|>|#|~)"), blueformat });
 
     greenformat = QTextCharFormat();
     greenformat.setForeground(QColor(0, 128, 0));
     greenformat.setFontItalic(true);
 
-    highlightingRules.append({ QRegularExpression(R"(\*.*)"), greenformat });
-
     categoryformat = QTextCharFormat();
     categoryformat.setBackground(QColor(245, 245, 220));
+
+    // make sure to append them in the right order
+    highlightingRules.append({ QRegularExpression(R"(@\d|_|>|#|~)"), blueformat });
+    highlightingRules.append({ QRegularExpression("/"), blackformat });
     highlightingRules.append({ QRegularExpression(categoryregexp), categoryformat });
     highlightingRules.append({ QRegularExpression(R"(\[.*?\])"), categoryformat });
+    highlightingRules.append({ QRegularExpression(R"(\*.*)"), greenformat });
 }
 
 void Highlighter::highlightBlock(const QString &text)
