@@ -32,11 +32,11 @@ void Highlighter::MakeHighlightingRules(QString categoryregexp)
     categoryformat.setBackground(QColor(245, 245, 220));
 
     // make sure to append them in the right order
-    highlightingRules.append({ QRegularExpression(R"(@\d|_|>|#|~)"), blueformat });
-    highlightingRules.append({ QRegularExpression("/"), blackformat });
-    highlightingRules.append({ QRegularExpression(categoryregexp), categoryformat });
-    highlightingRules.append({ QRegularExpression(R"(\[.*?\])"), categoryformat });
-    highlightingRules.append({ QRegularExpression(R"(\*.*)"), greenformat });
+    highlightingRules.append({ QRegularExpression(R"((@\d|_|>|#|~))"), blueformat });
+    highlightingRules.append({ QRegularExpression("(/)"), blackformat });
+    highlightingRules.append({ QRegularExpression("(" + categoryregexp + ")"), categoryformat });
+    highlightingRules.append({ QRegularExpression(R"((\[.*?\]))"), categoryformat });
+    highlightingRules.append({ QRegularExpression(R"(^[^_].*(\*.*))"), greenformat });
 }
 
 void Highlighter::highlightBlock(const QString &text)
@@ -48,7 +48,7 @@ void Highlighter::highlightBlock(const QString &text)
         while (matches.hasNext())
         {
             QRegularExpressionMatch match = matches.next();
-            setFormat(match.capturedStart(), match.capturedLength(), rule.format);
+            setFormat(match.capturedStart(1), match.capturedLength(1), rule.format);
         }
     }
 }
