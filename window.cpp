@@ -201,7 +201,6 @@ void Window::DoSoundChanges()
                             alwaysApply = true;
                             break;
                         }
-                        break;
                     }
                     else _change = splitchange.at(0);
 
