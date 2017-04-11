@@ -172,7 +172,10 @@ void Window::DoSoundChanges()
                 bool alwaysApply = false;
                 for (QString &_subchanged : subchanged)
                 {
-                    QStringList splitchange = change.replace(QRegularExpression(R"(\*.*)"), "").split(' ', QString::SkipEmptyParts);
+                    QStringList splitchange;
+                    if (change.at(0) == QChar('_')) splitchange = change                                           .split(' ', QString::SkipEmptyParts);
+                    else                            splitchange = change.replace(QRegularExpression(R"(\*.*)"), "").split(' ', QString::SkipEmptyParts);
+
                     if (splitchange.length() == 0) continue;
                     QString _change;
                     int prob = 100;
