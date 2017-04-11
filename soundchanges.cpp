@@ -41,8 +41,8 @@ QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, 
                 {
                     if (splitChange.length() == 2)
                     {
-                        if (reverse) newReplaced.append(_replaced);  // we can't reverse regexes yet, so we make sure
-                        else                                         // we handle them properly
+                        if (reverse) newReplaced.append(_replaced);  // we can't reverse regexes yet, so we just re-add the original word
+                        else
                         {
                             QRegularExpression regexp = QRegularExpression(PreProcessRegexp(splitChange.at(0).mid(1), categories));
                             newReplaced.append(std::make_pair(_replaced.first.replace(regexp, splitChange.at(1)), _replaced.second));
