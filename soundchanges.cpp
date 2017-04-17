@@ -289,13 +289,12 @@ bool SoundChanges::TryCharacters(QString word,
     QChar lastChar = ' ';
     QQueue<std::pair<QChar, int>> environmentcats;     // Categories encountered so far
 
+    // THE SPECIAL CASES '/XYZ/#_' and '/XYZ/_#'
+    // The expressions '/XYZ/#_' and '/XYZ/_#' should add XYZ to the beginning and the end of the word respectively.
+    // However, without special treatment, they both add XYZ to both the beginning and the end of the word, meaning
+    // that they have to be treated seperately from all other cases.
     if (chars == "_#")
     {
-        // THE SPECIAL CASE '/XYZ/_#'
-        // The expressions '/XYZ/#_' and '/XYZ/_#' should add XYZ to the beginning and the end of the word respectively.
-        // However, they both add to the beginning of the word.
-        // This means that the case '/XYZ/_#' needs to be treated seperately from all other cases.
-
         doesChangeApply &= SoundChanges::TryCharacter
                                         (word,
                                         '_',
@@ -309,6 +308,23 @@ bool SoundChanges::TryCharacters(QString word,
                                         outcats,
                                         recordcats);
         doesChangeApply &= curIndex == word.length();
+        return doesChangeApply;
+    }
+    else if (chars == "#_")
+    {
+        doesChangeApply &= curIndex == 0;
+        doesChangeApply &= SoundChanges::TryCharacter
+                                        (word,
+                                        '_',
+                                        lastChar,
+                                        &lastChar,
+                                        target,
+                                        curIndex,
+                                        categories,
+                                        startpos,
+                                        length,
+                                        outcats,
+                                        recordcats);
         return doesChangeApply;
     }
 
