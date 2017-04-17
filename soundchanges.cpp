@@ -290,6 +290,8 @@ bool SoundChanges::TryCharacters(QString word,
     QQueue<std::pair<QChar, int>> environmentcats;     // Categories encountered so far
 
     // THE SPECIAL CASES '/XYZ/#_' and '/XYZ/_#'
+    // =========================================
+    //
     // The expressions '/XYZ/#_' and '/XYZ/_#' should add XYZ to the beginning and the end of the word respectively.
     // However, without special treatment, they both add XYZ to both the beginning and the end of the word, meaning
     // that they have to be treated seperately from all other cases.
