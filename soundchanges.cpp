@@ -456,7 +456,7 @@ bool SoundChanges::TryCharacters(QString word,
                 if (curIndex >= word.length() || curIndex < 0) return false;
                 if (backreference >= environmentcats.length()) return false;
                 QChar c1 = categories.value(environmentcats.at(backreference).first).at(environmentcats.at(backreference).second);
-                doesChangeApply &= word.at(curIndex) == c;
+                doesChangeApply &= word.at(curIndex) == c1;
                 if (recordcats && outcats) outcats->enqueue(std::make_pair(environmentcats.at(backreference).second, c));
                 curIndex++;
             }
