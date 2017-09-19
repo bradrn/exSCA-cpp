@@ -31,14 +31,14 @@ public:
     static QStringList Filter(QStringList sl, QStringList f, QMap<QChar, QList<QChar>> cats);
 
 private:
-    static bool SoundChanges::TryRule(QString word,
-                                      int wordIndex,
-                                      QString change,
-                                      QMap<QChar, QList<QChar>> categories,
-                                      int *startpos,
-                                      int *length,
-                                      QQueue<std::pair<int, QChar>> *catnums,
-                                      bool reverse);
+    static bool TryRule(QString word,
+                        int wordIndex,
+                        QString change,
+                        QMap<QChar, QList<QChar>> categories,
+                        int *startpos,
+                        int *length,
+                        QQueue<std::pair<int, QChar>> *catnums,
+                        bool reverse);
 
     static bool TryCharacters(QString word,
                               int wordIndex,
