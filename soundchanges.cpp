@@ -136,6 +136,7 @@ QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, 
                                 }
                                 else nonceChars.append(c);
                                 break;
+                            case State::Optional: break;
                             case State::Backreference:
                                 bool ok = false;
                                 int backreference = QString(c).toInt(&ok) - 1;  // We start at '@1' but this corresponds to index 0 so we subtract 1

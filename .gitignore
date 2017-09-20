@@ -49,3 +49,5 @@ CMakeLists.txt.user*
 /release
 /x86
 /x64
+
+exSCA
