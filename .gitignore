@@ -36,7 +36,7 @@ Makefile*
 # QtCtreator CMake
 CMakeLists.txt.user*
 
-# Visual Studio --- I (bradrn) use Qt Visual Studio Tools
+# Visual Studio
 *.vcxproj
 *.vcxproj.*
 *.sdf
