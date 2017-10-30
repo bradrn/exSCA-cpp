@@ -200,6 +200,7 @@ void Window::DoSoundChanges()
                         case 'f':
                             if (reverse)
                                 goto CONTINUE;
+                            break;
                         case 'a':
                             alwaysApply = true;
                             break;
