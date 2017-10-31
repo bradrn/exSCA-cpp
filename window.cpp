@@ -170,6 +170,7 @@ void Window::DoSoundChanges()
             for (QString change : changes)
             {
                 bool alwaysApply = false;
+                bool reverseThisWord = reverse;
                 for (QString &_subchanged : subchanged)
                 {
                     QStringList splitchange;
@@ -198,8 +199,13 @@ void Window::DoSoundChanges()
                             break;
                         }
                         case 'f':
-                            if (reverse)
+                            if (reverseThisWord)
                                 goto CONTINUE;
+                            break;
+                        case 'b':
+                            if (!reverseThisWord)
+                                goto CONTINUE;
+                            reverseThisWord = false;      // So we can use normal rules with no special handling
                             break;
                         case 'a':
                             alwaysApply = true;
@@ -211,7 +217,7 @@ void Window::DoSoundChanges()
                     // Block is so no compiler error occurs: "Initialization of 'before' is skipped by 'goto CONTINUE'
                     {
                         QString before = _subchanged;
-                        _subchanged = SoundChanges::RemoveDuplicates(SoundChanges::ApplyChange(_subchanged, _change, *m_categorieslist, prob, reverse, alwaysApply).join(' '));
+                        _subchanged = SoundChanges::RemoveDuplicates(SoundChanges::ApplyChange(_subchanged, _change, *m_categorieslist, prob, reverseThisWord, alwaysApply).join(' '));
                         _subchanged.remove(m_syllableseperator->text().at(0));
                         if (_subchanged != before)
                             report.append(QString("<b>%1</b> changed <b>%2</b> to <b>%3</b><br/>").arg(_change, before, _subchanged));
