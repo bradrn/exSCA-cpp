@@ -183,37 +183,40 @@ void Window::DoSoundChanges()
                     int prob = 100;
                     if (splitchange.length() > 1)
                     {
-                        _change = splitchange.at(1);
-                        switch (splitchange.at(0).at(0).toLatin1())
+                        _change = splitchange.at(splitchange.length() - 1);
+                        for (int i = 0; i < splitchange.length() - 1; i++)
                         {
-                        case 'x':
-                            _subchanged = SoundChanges::Syllabify(syllabifyregexp, _subchanged, m_syllableseperator->text().at(0));
-                            break;
-                        case '?':
-                        {
-                            bool ok;
-                            int _prob = QString(splitchange.at(0).mid(1)).toInt(&ok);
-                            if (ok)
+                            switch (splitchange.at(i).at(0).toLatin1())
                             {
-                                prob = _prob;
+                            case 'x':
+                                _subchanged = SoundChanges::Syllabify(syllabifyregexp, _subchanged, m_syllableseperator->text().at(0));
+                                break;
+                            case '?':
+                            {
+                                bool ok;
+                                int _prob = QString(splitchange.at(i).mid(1)).toInt(&ok);
+                                if (ok)
+                                {
+                                    prob = _prob;
+                                }
+                                break;
                             }
-                            break;
-                        }
-                        case 'f':
-                            if (reverseThisWord)
-                                goto CONTINUE;
-                            break;
-                        case 'b':
-                            if (!reverseThisWord)
-                                goto CONTINUE;
-                            reverseThisWord = false;      // So we can use normal rules with no special handling
-                            break;
-                        case 'a':
-                            alwaysApply = true;
-                            break;
-                        case 's':
-                            sometimesApply = true;
-                            break;
+                            case 'f':
+                                if (reverseThisWord)
+                                    goto CONTINUE;
+                                break;
+                            case 'b':
+                                if (!reverseThisWord)
+                                    goto CONTINUE;
+                                reverseThisWord = false;      // So we can use normal rules with no special handling
+                                break;
+                            case 'a':
+                                alwaysApply = true;
+                                break;
+                            case 's':
+                                sometimesApply = true;
+                                break;
+                            }
                         }
                     }
                     else _change = splitchange.at(0);
