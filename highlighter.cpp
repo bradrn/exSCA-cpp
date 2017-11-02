@@ -32,7 +32,7 @@ void Highlighter::MakeHighlightingRules(QString categoryregexp)
     categoryformat.setBackground(QColor(245, 245, 220));
 
     // make sure to append them in the right order
-    highlightingRules.append({ QRegularExpression(R"((@\d|_|>|#|~))"), blueformat });
+    highlightingRules.append({ QRegularExpression(R"((@\d|_|>|#|~|`))"), blueformat });
     highlightingRules.append({ QRegularExpression("(/)"), blackformat });
     highlightingRules.append({ QRegularExpression("(" + categoryregexp + ")"), categoryformat });
     highlightingRules.append({ QRegularExpression(R"((\[.*?\]))"), categoryformat });
