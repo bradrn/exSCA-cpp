@@ -57,6 +57,7 @@ QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, 
                     QList<QChar> backreferences;
                     State state = State::Normal;
                     QList<QChar> nonceChars;
+                    bool insertMultiple = false;
 
                     for (QChar c : splitChange.at(1))
                     {
@@ -67,7 +68,7 @@ QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, 
                             case State::Normal:
                                 if (categories.contains(c))
                                 {
-                                    if (catnums.length() > 0)
+                                    if ((catnums.length() > 0) && (!insertMultiple))
                                     {
                                         QChar c1;
                                         std::pair<int, QChar> deq = catnums.dequeue();
@@ -103,6 +104,7 @@ QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, 
                                 else if (c == '~') catnums.dequeue();
                                 else if (c == '@') state = State::Backreference;
                                 else if (c == '[') state = State::Nonce;
+                                else if (c == '`') insertMultiple = true;
                                 else
                                 {
                                     replacement.append(c);
@@ -113,7 +115,7 @@ QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, 
                                 if (c == ']')
                                 {
                                     std::pair<QString, bool> parsedChars = SoundChanges::ParseNonce(nonceChars, categories);
-                                    if (catnums.length() > 0)
+                                    if ((catnums.length() > 0) && (!insertMultiple))
                                     {
                                         QChar c1;
                                         std::pair<int, QChar> deq = catnums.dequeue();
