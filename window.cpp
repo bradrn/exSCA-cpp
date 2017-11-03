@@ -118,14 +118,14 @@ Window::Window()
     connect(m_filtercurrent, &QPushButton::clicked, this, &Window::FilterCurrent);
 
     fileMenu = menuBar()->addMenu("File");
-    fileMenu->addAction("Open sound changes", this, &Window::OpenEsc);
+    fileMenu->addAction("Open sound changes", this, &Window::OpenEsc, QKeySequence(QKeySequence::Open));
     fileMenu->addAction("Open wordlist", this, &Window::OpenLex);
-    fileMenu->addAction("Save sound changes", this, &Window::SaveEsc);
-    fileMenu->addAction("Save sound changes as", this, &Window::SaveEscAs);
+    fileMenu->addAction("Save sound changes", this, &Window::SaveEsc, QKeySequence(QKeySequence::Save));
+    fileMenu->addAction("Save sound changes as", this, &Window::SaveEscAs, QKeySequence(QKeySequence::SaveAs));
     fileMenu->addAction("Save wordlist as", this, &Window::SaveLex);
 
     toolsMenu = menuBar()->addMenu("Tools");
-    toolsMenu->addAction("Affixer", this, &Window::LaunchAffixer);
+    toolsMenu->addAction("Affixer", this, &Window::LaunchAffixer, QKeySequence(Qt::CTRL + Qt::Key_J));
 
     helpMenu = menuBar()->addMenu("Help");
     helpMenu->addAction("About", this, &Window::LaunchAboutBox);
