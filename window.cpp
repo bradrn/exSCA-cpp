@@ -14,30 +14,47 @@ Window::Window()
 
     m_layout = new QHBoxLayout;
     m_leftlayout = new QVBoxLayout;
+    m_ruleslayout = new QVBoxLayout;
+    m_wordslayout = new QVBoxLayout;
     m_midlayout = new QVBoxLayout;
+    m_resultslayout = new QVBoxLayout;
     m_syllableseperatorlayout = new QHBoxLayout;
     mainwidget->setLayout(m_layout);
 
     QFont font("Courier", 10);
     font.setFixedPitch(true);
 
+    m_categorieslabel = new QLabel("Categories:");
+    m_leftlayout->addWidget(m_categorieslabel);
     m_categories = new QPlainTextEdit;
     m_categories->setFont(font);
     m_leftlayout->addWidget(m_categories, 2);
 
+    m_rewriteslabel = new QLabel("Rewrite rules:");
+    m_leftlayout->addWidget(m_rewriteslabel);
     m_rewrites = new QPlainTextEdit;
     m_leftlayout->addWidget(m_rewrites, 1);
 
     m_layout->addLayout(m_leftlayout);
 
+    m_ruleslabel = new QLabel("Sound changes:");
+    m_ruleslayout->addWidget(m_ruleslabel);
     m_rules = new QPlainTextEdit;
     m_rules->setFont(font);
     m_highlighter = new Highlighter(m_rules->document());
-    m_layout->addWidget(m_rules);
+    m_ruleslayout->addWidget(m_rules);
 
+    m_layout->addLayout(m_ruleslayout);
+
+    m_wordslabel = new QLabel("Input lexicon:");
+    m_wordslayout->addWidget(m_wordslabel);
     m_words = new QPlainTextEdit;
-    m_layout->addWidget(m_words);
+    m_wordslayout->addWidget(m_words);
 
+    m_layout->addLayout(m_wordslayout);
+
+    m_applyfillerlabel = new QLabel("");
+    m_midlayout->addWidget(m_applyfillerlabel);
     m_apply = new QPushButton("Apply");
     m_midlayout->addWidget(m_apply);
 
@@ -107,9 +124,13 @@ Window::Window()
     m_midlayout->addLayout(m_syllableseperatorlayout);
     m_layout->addLayout(m_midlayout);
 
+    m_resultslabel = new QLabel("Output lexicon:");
+    m_resultslayout->addWidget(m_resultslabel);
     m_results = new QTextEdit;
     m_results->setReadOnly(true);
-    m_layout->addWidget(m_results);
+    m_resultslayout->addWidget(m_results);
+
+    m_layout->addLayout(m_resultslayout);
 
     m_categorieslist = new QMap<QChar, QList<QChar>>();
 

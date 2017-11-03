@@ -34,17 +34,26 @@ public:
 private:
     QHBoxLayout *m_layout;
     QVBoxLayout *m_leftlayout;
+    QVBoxLayout *m_ruleslayout;
+    QVBoxLayout *m_wordslayout;
     QVBoxLayout *m_midlayout;
+    QVBoxLayout *m_resultslayout;
     QHBoxLayout *m_syllableseperatorlayout;
 
+    QLabel *m_categorieslabel;
     QPlainTextEdit *m_categories;
+    QLabel *m_rewriteslabel;
     QPlainTextEdit *m_rewrites;
+    QLabel *m_ruleslabel;
     QPlainTextEdit *m_rules;
+    QLabel *m_wordslabel;
     QPlainTextEdit *m_words;
+    QLabel *m_applyfillerlabel;
     QPushButton *m_apply;
     QLineEdit *m_syllabify;
     QLineEdit *m_syllableseperator;
     QLabel *m_syllableseperatorlabel;
+    QLabel *m_resultslabel;
     QTextEdit *m_results;
 
     QCheckBox *m_showChangedWords;
