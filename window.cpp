@@ -118,10 +118,10 @@ Window::Window()
     connect(m_filtercurrent, &QPushButton::clicked, this, &Window::FilterCurrent);
 
     fileMenu = menuBar()->addMenu("File");
-    fileMenu->addAction("Open .esc file", this, &Window::OpenEsc);
-    fileMenu->addAction("Open .lex file", this, &Window::OpenLex);
-    fileMenu->addAction("Save .esc file", this, &Window::SaveEsc);
-    fileMenu->addAction("Save .lex file", this, &Window::SaveLex);
+    fileMenu->addAction("Open sound changes", this, &Window::OpenEsc);
+    fileMenu->addAction("Open wordlist", this, &Window::OpenLex);
+    fileMenu->addAction("Save sound changes as", this, &Window::SaveEsc);
+    fileMenu->addAction("Save wordlist as", this, &Window::SaveLex);
 
     toolsMenu = menuBar()->addMenu("Tools");
     toolsMenu->addAction("Affixer", this, &Window::LaunchAffixer);
