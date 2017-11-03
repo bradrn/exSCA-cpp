@@ -120,7 +120,8 @@ Window::Window()
     fileMenu = menuBar()->addMenu("File");
     fileMenu->addAction("Open sound changes", this, &Window::OpenEsc);
     fileMenu->addAction("Open wordlist", this, &Window::OpenLex);
-    fileMenu->addAction("Save sound changes as", this, &Window::SaveEsc);
+    fileMenu->addAction("Save sound changes", this, &Window::SaveEsc);
+    fileMenu->addAction("Save sound changes as", this, &Window::SaveEscAs);
     fileMenu->addAction("Save wordlist as", this, &Window::SaveLex);
 
     toolsMenu = menuBar()->addMenu("Tools");
@@ -403,6 +404,8 @@ void Window::RealOpenEsc(QString fileName)
     m_rewrites->setPlainText(rews.join('\n'));
 
     file.close();
+
+    SetCurrentFile(fileName);
 }
 
 void Window::OpenLex()
@@ -429,7 +432,18 @@ void Window::OpenLex()
 
 void Window::SaveEsc()
 {
+    if (currentFile == "") SaveEscAs();
+    else RealSaveEsc(currentFile);
+}
+
+void Window::SaveEscAs()
+{
     QString fileName = QFileDialog::getSaveFileName(this, "Save As .esc File", QString(), "exSCA Files (*.esc);;All files (*.*)");
+    RealSaveEsc(fileName);
+}
+
+void Window::RealSaveEsc(QString fileName)
+{
     QFile file(fileName);
 
     if (!file.open(QIODevice::WriteOnly))
@@ -445,6 +459,8 @@ void Window::SaveEsc()
     out << m_rules     ->toPlainText().toUtf8() << endl;
 
     file.close();
+
+    SetCurrentFile(fileName);
 }
 
 void Window::SaveLex()
@@ -476,4 +492,10 @@ void Window::LaunchAboutBox()
 void Window::LaunchAboutQt()
 {
     QMessageBox::aboutQt(this, "About Qt");
+}
+
+void Window::SetCurrentFile(QString fileName)
+{
+    currentFile = fileName;
+    setWindowTitle("exSCA - "  + fileName);
 }

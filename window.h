@@ -86,12 +86,18 @@ private slots:
     void OpenEsc();
     void OpenLex();
     void SaveEsc();
+    void SaveEscAs();
     void SaveLex();
     void RealOpenEsc(QString fileName);
+    void RealSaveEsc(QString fileName);
 
     void LaunchAffixer();
     void LaunchAboutBox();
     void LaunchAboutQt();
+
+private:
+    QString currentFile = "";
+    void SetCurrentFile(QString fileName);
 };
 
 #endif // WINDOW_H
