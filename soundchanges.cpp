@@ -61,6 +61,7 @@ QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, 
 
                     for (QChar c : splitChange.at(1))
                     {
+                        int i = 0;
                         for (QString &replacement : replacements)
                         {
                             switch (state)
@@ -72,6 +73,7 @@ QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, 
                                     {
                                         QChar c1;
                                         std::pair<int, QChar> deq = catnums.dequeue();
+                                        if (i != replacements.length()) catnums.enqueue(deq);
                                         if (categories.value(c).length() > deq.first) c1 = categories.value(c).at(deq.first);
                                         else c1 = deq.second;
 
@@ -87,6 +89,7 @@ QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, 
                                         }
                                     }
                                     insertMultiple = false;
+                                    i++;
                                 }
                                 else if (c == '\\')
                                 {
