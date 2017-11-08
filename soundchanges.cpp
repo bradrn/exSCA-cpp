@@ -86,6 +86,7 @@ QStringList SoundChanges::ApplyChange(QString word, QString change, QMap<QChar, 
                                             newReplacements.append(replacement + c1);
                                         }
                                     }
+                                    insertMultiple = false;
                                 }
                                 else if (c == '\\')
                                 {
