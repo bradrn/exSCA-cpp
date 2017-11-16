@@ -197,8 +197,11 @@ void Window::DoSoundChanges()
                 for (QString &_subchanged : subchanged)
                 {
                     QStringList splitchange;
-                    if (change.at(0) == QChar('_')) splitchange = change                                           .split(' ', QString::SkipEmptyParts);
-                    else                            splitchange = change.replace(QRegularExpression(R"(\*.*)"), "").split(' ', QString::SkipEmptyParts);
+                    if ((change.at(0) == QChar('_')) || QRegularExpression(" _").match(change).hasMatch())
+                        // We need the second expression to account for cases like 'f _ax*b/c'
+                        splitchange = change                                           .split(' ', QString::SkipEmptyParts);
+                    else
+                        splitchange = change.replace(QRegularExpression(R"(\*.*)"), "").split(' ', QString::SkipEmptyParts);
 
                     if (splitchange.length() == 0) continue;
                     QString _change;
