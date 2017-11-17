@@ -36,7 +36,7 @@ void Highlighter::MakeHighlightingRules(QString categoryregexp)
     highlightingRules.append({ QRegularExpression("(/)"), blackformat });
     highlightingRules.append({ QRegularExpression("(" + categoryregexp + ")"), categoryformat });
     highlightingRules.append({ QRegularExpression(R"((\[.*?\]))"), categoryformat });
-    highlightingRules.append({ QRegularExpression(R"(^(?:[^_].*)?(\*.*))"), greenformat });
+    highlightingRules.append({ QRegularExpression(R"(^(?:[^ ]+ (?:[^ ]+ )*)?(?:[^_][^ ]*)?(\*.*))"), greenformat });
 }
 
 void Highlighter::highlightBlock(const QString &text)
